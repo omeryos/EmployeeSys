@@ -6,7 +6,9 @@ import java.util.*;
 
 public class EmployeeHandler implements HttpHandler {
     private static MyLogger logger = new MyLogger();
+
     @Override
+
     public void handle(HttpExchange exchange) throws IOException {
 
         String path = exchange.getRequestURI().getPath();
@@ -16,7 +18,7 @@ public class EmployeeHandler implements HttpHandler {
             handleGetEmployees(exchange);
         } else if (path.startsWith("/employee/") && "GET".equalsIgnoreCase(exchange.getRequestMethod())) {
             String employeeCodeStr = path.replace("/employee/", "");
-//            System.out.println("Parsed Employee Code: " + employeeCodeStr);
+
 
             try {
                 int employeeCode = Integer.parseInt(employeeCodeStr);
@@ -41,15 +43,16 @@ public class EmployeeHandler implements HttpHandler {
         List<Employee> employees = DataSource.getEmployees(isActive, minCode, maxCode);
 
         if (sortField != null) {
+            System.out.println("Sorting employees by: " + sortField);
             employees = sortEmployees(employees, sortField, order);
         }
 
-        logger.log("Employees returned from query: " + employees );
+        System.out.println("Employees returned from query: " + employees );
         String jsonResponse = convertToJson(employees, includeSalaries);
         sendResponse(exchange, jsonResponse);
     }
 
-    public static void handleGetEmployee(HttpExchange exchange, int employeeCode) throws IOException {
+    public static void handleGetEmployee(HttpExchange exchange, int employeeCode ) throws IOException {
         Map<String, String> params = queryToMap(exchange.getRequestURI().getQuery());
         boolean includeSalaries = "true".equals(params.get("includeSalaries"));
         boolean includeAddress = "true".equals(params.get("address"));
@@ -59,7 +62,7 @@ public class EmployeeHandler implements HttpHandler {
             sendResponse(exchange, "Employee not found", 404);
             return;
         }
-        logger.log("Employees returned from query: " + employeeCode );
+        System.out.println("Employee returned from query: " + employee );
         String jsonResponse = employee.toJson(includeSalaries, includeAddress);
         sendResponse(exchange, jsonResponse);
     }

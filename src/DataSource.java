@@ -124,7 +124,7 @@ public class DataSource {
         return filteredEmployees;
     }
     public static Employee getEmployeeByCode(int employeeCode) {
-        System.out.println("employee code in the getEmployeeByCode " + employeeCode);
+        System.out.println("Employee code in the getEmployeeByCode " + employeeCode);
 
 
 

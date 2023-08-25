@@ -9,7 +9,7 @@ public class MyLogger {
 
     public MyLogger() {
         // Create a log file name based on the current date and time
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("ddMMyyyy_HHmmss");
         String dateTime = dateFormat.format(new Date());
         this.logFileName = dateTime + ".log";
     }
@@ -32,5 +32,9 @@ public class MyLogger {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    public void logSystemOut(String message) {
+        System.out.println(message);
+        log(message); // Append to log file as well
     }
 }
