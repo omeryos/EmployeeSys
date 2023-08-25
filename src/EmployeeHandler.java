@@ -5,7 +5,7 @@ import java.io.OutputStream;
 import java.util.*;
 
 public class EmployeeHandler implements HttpHandler {
-
+    private static MyLogger logger = new MyLogger();
     @Override
     public void handle(HttpExchange exchange) throws IOException {
 
@@ -44,6 +44,7 @@ public class EmployeeHandler implements HttpHandler {
             employees = sortEmployees(employees, sortField, order);
         }
 
+        logger.log("Employees returned from query: " + employees );
         String jsonResponse = convertToJson(employees, includeSalaries);
         sendResponse(exchange, jsonResponse);
     }
@@ -58,7 +59,7 @@ public class EmployeeHandler implements HttpHandler {
             sendResponse(exchange, "Employee not found", 404);
             return;
         }
-
+        logger.log("Employees returned from query: " + employeeCode );
         String jsonResponse = employee.toJson(includeSalaries, includeAddress);
         sendResponse(exchange, jsonResponse);
     }
@@ -100,6 +101,7 @@ public class EmployeeHandler implements HttpHandler {
         }
 
         employees.sort(comparator);
+
         return employees;
     }
 

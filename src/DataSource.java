@@ -127,18 +127,20 @@ public class DataSource {
         System.out.println("employee code in the getEmployeeByCode " + employeeCode);
 
 
+
         if (employeesCache == null) {
             System.out.println("Cache is null. Populating...");
             getEmployees(null, null, null);  // This will populate the cache
         }
 
         System.out.println("Cache size: " + employeesCache.size());
-        System.out.println("Cache contains key for employee code 845707: " + employeesCache.containsKey(845707));
+
 
         if (!employeesCache.containsKey(employeeCode)) {
             System.out.println("Cache does not contain key for employee code: " + employeeCode);
             return null;
         }
+
         return employeesCache.get(employeeCode);
     }
 

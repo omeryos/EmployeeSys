@@ -27,3 +27,7 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+/Employees.dat
+/Employees.eng.dat
+/Salaries.dat
+/Users.dat
