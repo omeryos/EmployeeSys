@@ -130,7 +130,7 @@ public class DataSource {
 
         if (employeesCache == null) {
             System.out.println("Cache is null. Populating...");
-            getEmployees(null, null, null);  // This will populate the cache
+            getEmployees(null, null, null);  // empty params to populate the cache
         }
 
         System.out.println("Cache size: " + employeesCache.size());

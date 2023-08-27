@@ -32,6 +32,7 @@ public class EmployeeHandler implements HttpHandler {
     }
 
     public void handleGetEmployees(HttpExchange exchange) throws IOException {
+        Main.addCorsHeaders(exchange);
         Map<String, String> params = queryToMap(exchange.getRequestURI().getQuery());
         Integer minCode = parseInteger(params, "minCode");
         Integer maxCode = parseInteger(params, "maxCode");
@@ -53,6 +54,7 @@ public class EmployeeHandler implements HttpHandler {
     }
 
     public static void handleGetEmployee(HttpExchange exchange, int employeeCode ) throws IOException {
+        Main.addCorsHeaders(exchange);
         Map<String, String> params = queryToMap(exchange.getRequestURI().getQuery());
         boolean includeSalaries = "true".equals(params.get("includeSalaries"));
         boolean includeAddress = "true".equals(params.get("address"));
