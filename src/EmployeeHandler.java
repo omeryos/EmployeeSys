@@ -10,7 +10,10 @@ public class EmployeeHandler implements HttpHandler {
     @Override
 
     public void handle(HttpExchange exchange) throws IOException {
-
+        if (!LoginHandler.isAuthorized) {
+            sendResponse(exchange, "Unauthorized", 401);
+            return;
+        }
         String path = exchange.getRequestURI().getPath();
         System.out.println("Received request for path: " + path);
 
@@ -110,7 +113,7 @@ public class EmployeeHandler implements HttpHandler {
         return employees;
     }
 
-    private static Map<String, String> queryToMap(String query) {
+    public static Map<String, String> queryToMap(String query) {
         Map<String, String> result = new HashMap<>();
         if (query != null) {
             for (String param : query.split("&")) {
