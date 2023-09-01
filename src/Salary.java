@@ -13,6 +13,20 @@ public class Salary {
     public double getTotal() {
         return total;
     }
+
+    public String getDate(){
+        return date;
+    }
+
+    public double getGrossSalary(){
+        return gross;
+    }
+
+    public double getTax(){
+        return tax;
+    }
+
+
     public String toJson() {
         return String.format(
                 "{\"date\": \"%s\", \"gross\": %.2f, \"tax\": %.2f, \"total\": %.2f}",

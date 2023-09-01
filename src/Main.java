@@ -2,7 +2,6 @@ import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.io.PrintStream;
 import java.util.Scanner;
 
 public class Main {
@@ -13,7 +12,10 @@ public class Main {
         // Redirect System.out to logger
         DualOutputPrintStream dualOutput = new DualOutputPrintStream(System.out, logger);
         System.setOut(dualOutput);
+
+        // Initialize the logger
         DataSource.getUser();
+
         Scanner scanner = new Scanner(System.in);
         String[] credentials = new String[2];
         System.out.print("Enter username: ");
@@ -30,16 +32,21 @@ public class Main {
             // Start the server
             HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
 
+            // Create instances of handlers
+            LoginHandler loginHandler = new LoginHandler();
+            EmployeeHandler employeeHandler = new EmployeeHandler();
+
             // Wrap the HttpHandler instances with LoggingHttpHandler
-            server.createContext("/login", new LoginHandler());
-            server.createContext("/employees", new EmployeeHandler());
-            server.createContext("/employee/", new EmployeeHandler());
+            server.createContext("/login", loginHandler);
+            server.createContext("/employees", employeeHandler);
+            server.createContext("/employee/", employeeHandler);
 
             server.setExecutor(null); // Creates a default executor
             server.start();
             logger.log("Server started on port 8000");
         } else {
             System.out.println("Invalid credentials. Access denied, program shutdown.");
+
             System.exit(401);
         }
     }

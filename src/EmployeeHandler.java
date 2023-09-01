@@ -5,10 +5,8 @@ import java.io.OutputStream;
 import java.util.*;
 
 public class EmployeeHandler implements HttpHandler {
-    private static MyLogger logger = new MyLogger();
 
     @Override
-
     public void handle(HttpExchange exchange) throws IOException {
         if (!LoginHandler.isAuthorized) {
             sendResponse(exchange, "Unauthorized", 401);
@@ -22,10 +20,18 @@ public class EmployeeHandler implements HttpHandler {
         } else if (path.startsWith("/employee/") && "GET".equalsIgnoreCase(exchange.getRequestMethod())) {
             String employeeCodeStr = path.replace("/employee/", "");
 
-
             try {
                 int employeeCode = Integer.parseInt(employeeCodeStr);
-                handleGetEmployee(exchange, employeeCode);
+                Map<String, String> params = queryToMap(exchange.getRequestURI().getQuery());
+                boolean toFile = params.containsKey("toFile") && params.get("toFile").equalsIgnoreCase("true");
+
+                if (toFile) {
+                    // Handle the case for generating and sending CSV file
+                    handleGetEmployeeCSV(exchange, employeeCode);
+                } else {
+                    // Handle the case for returning JSON data
+                    handleGetEmployee(exchange, employeeCode);
+                }
             } catch (NumberFormatException e) {
                 sendResponse(exchange, "Invalid Employee Code", 400);
             }
@@ -43,6 +49,7 @@ public class EmployeeHandler implements HttpHandler {
         String sortField = params.get("sortField");
         String order = params.get("order");
         Boolean includeSalaries = Boolean.parseBoolean(params.get("includeSalaries"));
+        boolean toFile = params.containsKey("toFile") && params.get("toFile").equalsIgnoreCase("true");
 
         List<Employee> employees = DataSource.getEmployees(isActive, minCode, maxCode);
 
@@ -51,9 +58,35 @@ public class EmployeeHandler implements HttpHandler {
             employees = sortEmployees(employees, sortField, order);
         }
 
-        System.out.println("Employees returned from query: " + employees );
-        String jsonResponse = convertToJson(employees, includeSalaries);
-        sendResponse(exchange, jsonResponse);
+        System.out.println("Employees returned from query: " + employees);
+        String response;
+
+        if (toFile) {
+            response = convertToCSV(employees);
+            exchange.getResponseHeaders().add("Content-Type", "text/csv");
+            exchange.getResponseHeaders().add("Content-Disposition", "attachment; filename=employees.csv");
+        } else {
+            response = convertToJson(employees, includeSalaries);
+            exchange.getResponseHeaders().add("Content-Type", "application/json");
+        }
+
+        sendResponse(exchange, response);
+    }
+
+    public void handleGetEmployeeCSV(HttpExchange exchange, int employeeCode) throws IOException {
+        Main.addCorsHeaders(exchange);
+        Employee employee = DataSource.getEmployeeByCode(employeeCode);
+
+        if (employee == null) {
+            sendResponse(exchange, "Employee not found", 404);
+            return;
+        }
+
+        String csv = convertToCSV(Collections.singletonList(employee));
+        exchange.getResponseHeaders().add("Content-Type", "text/csv");
+        exchange.getResponseHeaders().add("Content-Disposition", "attachment; filename=employee.csv");
+
+        sendResponse(exchange, csv);
     }
 
     public static void handleGetEmployee(HttpExchange exchange, int employeeCode ) throws IOException {
@@ -61,6 +94,7 @@ public class EmployeeHandler implements HttpHandler {
         Map<String, String> params = queryToMap(exchange.getRequestURI().getQuery());
         boolean includeSalaries = "true".equals(params.get("includeSalaries"));
         boolean includeAddress = "true".equals(params.get("address"));
+        boolean toFile = params.containsKey("toFile") && params.get("toFile").equalsIgnoreCase("true");
 
         Employee employee = DataSource.getEmployeeByCode(employeeCode);
         if (employee == null) {
@@ -71,7 +105,6 @@ public class EmployeeHandler implements HttpHandler {
         String jsonResponse = employee.toJson(includeSalaries, includeAddress);
         sendResponse(exchange, jsonResponse);
     }
-
 
     private static Integer parseInteger(Map<String, String> params, String key) {
         if (params.containsKey(key)) {
@@ -147,5 +180,22 @@ public class EmployeeHandler implements HttpHandler {
         }
         json.append("]");
         return json.toString();
+    }
+
+    private static String convertToCSV(List<Employee> employees) {
+        StringBuilder csv = new StringBuilder("Code,Name,IsActive,Street,Number,City,Country,SalaryDate,GrossSalary,Tax,NetSalary\n");
+
+        for (Employee employee : employees) {
+            List<Salary> salaries = employee.getSalaries();
+            String employeeRow = String.format("%d,%s,%d,%s,%s,%s,%s", employee.getCode(), employee.getName(), employee.getIsActive(),
+                    employee.getAddressStreet(), employee.getAddressNumber(), employee.getAddressCity(), employee.getAddressCountry());
+            csv.append(employeeRow).append("\n");
+            for (Salary salary : salaries) {
+                String salaryRow = String.format(",%s,%.2f,%.2f,%.2f", salary.getDate(), salary.getGrossSalary(), salary.getTax(), salary.getTotal());
+                csv.append(salaryRow).append("\n");
+            }
+        }
+
+        return csv.toString();
     }
 }

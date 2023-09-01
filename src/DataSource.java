@@ -112,6 +112,8 @@ public class DataSource {
         // Return filtered list
         List<Employee> filteredEmployees = new ArrayList<>();
         for (Employee employee : employeesCache.values()) {
+
+
             int code = employee.getCode();
             int activeStatus = employee.getIsActive();
             if ((isActive == null || isActive == activeStatus) &&
@@ -126,6 +128,14 @@ public class DataSource {
     public static Employee getEmployeeByCode(int employeeCode) {
         System.out.println("Employee code in the getEmployeeByCode " + employeeCode);
 
+//        try { //intreduced a 5 sec delay to check async logger
+//            // Pause for 1 second (1000 milliseconds)
+//            Thread.sleep(5000);
+//        } catch (InterruptedException e) {
+//            // This part is executed if an interrupt occurs
+//            Thread.currentThread().interrupt(); // Optional, but recommended
+//            System.out.println("Interrupted!");
+//        }
 
 
         if (employeesCache == null) {

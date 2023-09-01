@@ -13,16 +13,16 @@ public class LoginHandler implements HttpHandler {
         String path = exchange.getRequestURI().getPath();
         System.out.println("path in the login handler: " + path);
         if ("POST".equals(exchange.getRequestMethod()))  {
-//&& ("/Login/".equalsIgnoreCase(path)))
+
+                //user POSTed username and pass
                 String userNameAndPass = path.replace("/login/", "");
-                String result = null;
+
                 String[] credentials = new String[2];
-                // Here, you would handle the login logic (e.g., read the request body, validate credentials, etc.)
-                // For now, we'll just send a successful response.
-                //EmployeeHandler.queryToMap(exchange.getRequestURI().getQuery());
+            // the login logic
+                //separating username and Pass
                 String[] entry = userNameAndPass.split("&");
-                credentials[0] = entry[0];
-                credentials[1] = entry[1];
+                credentials[0] = entry[0]; //username
+                credentials[1] = entry[1]; //password
 
                 System.out.println("username and password entered: " + userNameAndPass);
                 System.out.println("credentials: " + credentials[0] + " " + credentials[1]);
@@ -36,14 +36,18 @@ public class LoginHandler implements HttpHandler {
                 OutputStream os = exchange.getResponseBody();
                 os.write(response.getBytes());
                 os.close();
-
+                exchange.close();
                 System.out.println("isAuth " + isAuthorized );
             }else{
                 isAuthorized = false;
                 System.out.println("Invalid credentials...naughty naughty!");
-                String response = "Wrong username or password!";
-                exchange.sendResponseHeaders(401, -1); // 401  Not Allowed
+                String response = "Invalid credentials...naughty naughty!";
+                exchange.sendResponseHeaders(401, response.length()); // 401  Not Allowed
+                OutputStream os = exchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
                 exchange.close();
+
             }
 
         }
